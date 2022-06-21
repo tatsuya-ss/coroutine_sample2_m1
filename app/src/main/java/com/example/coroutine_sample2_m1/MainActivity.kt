@@ -24,8 +24,9 @@ class MainActivity : AppCompatActivity() {
                 for (x in 1..5) {
                     channel.send(x * x)
                 }
+                channel.close()
             }
-            repeat(5) { Log.d("Tatsuya🐲", "onCreate: ${channel.receive()}") }
+            for (y in channel) { Log.d("Tatsuya🐲", "onCreate: ${y}") }
             Log.d("Tatsuya🐲", "onCreate: Done")
         }
 
