@@ -18,20 +18,28 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val channel = Channel<Int>()
-
         scope.launch {
-            val squares = produceSquares()
+            val numbers = produceNumber()
+            val squares = squares(numbers)
 
-            squares.consumeEach { Log.d("Tatsuya🐲", "onCreate: ${it}") }
-            Log.d("Tatsuya🐲", "onCreate: Done")
+            repeat(6) {
+                Log.d("Tatsuya", "onCreate: ${squares.receive()}")
+            }
+            Log.d("Tatsuya", "onCreate: done")
+            coroutineContext.cancelChildren()
         }
 
     }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun CoroutineScope.produceSquares(): ReceiveChannel<Int> = produce {
-    for (x in 1..5) send(x * x)
+fun CoroutineScope.produceNumber(): ReceiveChannel<Int> = produce {
+    var x = 1
+    while (true) send(x++)
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun CoroutineScope.squares(numbers: ReceiveChannel<Int>): ReceiveChannel<Int> = produce {
+    for (x in numbers) send(x * x)
 }
 
