@@ -13,33 +13,22 @@ class MainActivity : AppCompatActivity() {
 
     private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         scope.launch {
-            val numbers = produceNumber()
-            val squares = squares(numbers)
-
-            repeat(6) {
-                Log.d("Tatsuya", "onCreate: ${squares.receive()}")
+            val channel = Channel<Int>(capacity = 4)
+            val sender = launch {
+                repeat(10) {
+                    Log.d("Tatsuya", "${it}送信中")
+                    channel.send(it)
+                }
             }
-            Log.d("Tatsuya", "onCreate: done")
-            coroutineContext.cancelChildren()
+
+            delay(1000)
+            sender.cancel()
         }
 
     }
 }
-
-@OptIn(ExperimentalCoroutinesApi::class)
-fun CoroutineScope.produceNumber(): ReceiveChannel<Int> = produce {
-    var x = 1
-    while (true) send(x++)
-}
-
-@OptIn(ExperimentalCoroutinesApi::class)
-fun CoroutineScope.squares(numbers: ReceiveChannel<Int>): ReceiveChannel<Int> = produce {
-    for (x in numbers) send(x * x)
-}
-
